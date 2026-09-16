@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTAR POS</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Roles y permisos</h1>
+            </div>
+
+            <div class="panel">
+                <h2>Crear rol</h2>
+                <form id="role-form" class="grid-form roles-form">
+                    <div>
+                        <label>Nombre del rol</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div>
+                        <label>Descripción</label>
+                        <input type="text" name="description" placeholder="Ej. Ejecutivo de ventas">
+                    </div>
+                    <div class="full-span">
+                        <label>Permisos</label>
+                        <div class="checkbox-grid" id="permissions-checks"></div>
+                    </div>
+                    <div class="full-span">
+                        <button type="submit">Guardar rol</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel table-panel">
+                <h2>Roles existentes</h2>
+                <div class="table-wrapper">
+                    <table class="responsive-table roles-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Permisos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roles-body">
+                            <tr><td colspan="4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/pages/roles.js"></script>
+</body>
+</html>

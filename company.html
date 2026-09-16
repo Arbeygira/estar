@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTAR POS</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Empresa</h1>
+            </div>
+
+            <div class="company-layout">
+                <div class="panel company-hero" id="company-hero"></div>
+
+                <div class="panel profile-panel">
+                    <h2>Datos de la empresa</h2>
+                    <form id="company-form" class="grid-form company-form">
+                        <div>
+                            <label>Nombre</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div>
+                            <label>NIT / Documento</label>
+                            <input type="text" name="document">
+                        </div>
+                        <div>
+                            <label>Teléfono</label>
+                            <input type="text" name="phone">
+                        </div>
+                        <div>
+                            <label>Correo</label>
+                            <input type="email" name="email">
+                        </div>
+                        <div class="full-span">
+                            <label>Dirección</label>
+                            <input type="text" name="address">
+                        </div>
+                        <div class="full-span">
+                            <label>Logo de la empresa</label>
+                            <div class="company-logo-box" id="company-logo-box"></div>
+                            <input type="file" name="logo_file" accept="image/*">
+                        </div>
+                        <div class="full-span company-form-actions">
+                            <button type="submit">Guardar información</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/pages/company.js"></script>
+</body>
+</html>

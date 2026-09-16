@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTAR POS</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Mi perfil</h1>
+            </div>
+
+            <div class="panel profile-panel">
+                <div class="profile-header" id="profile-header"></div>
+
+                <form id="profile-form" class="grid-form">
+                    <div>
+                        <label>Nombre completo</label>
+                        <input type="text" name="full_name" required>
+                    </div>
+                    <div>
+                        <label>Subir foto</label>
+                        <input type="file" name="avatar_file" accept="image/*">
+                    </div>
+                    <div>
+                        <label>Nueva contraseña</label>
+                        <input type="password" name="password" placeholder="Dejar vacío para no cambiar">
+                    </div>
+                    <div class="full-span">
+                        <button type="submit">Guardar perfil</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/pages/profile.js"></script>
+</body>
+</html>

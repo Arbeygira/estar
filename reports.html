@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESTAR POS</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Reportes</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <span>Ventas totales</span>
+                    <strong id="stat-sales">COP $0</strong>
+                </div>
+                <div class="stat-card red">
+                    <span>Gastos totales</span>
+                    <strong id="stat-expenses">COP $0</strong>
+                </div>
+                <div class="stat-card blue">
+                    <span>Balance</span>
+                    <strong id="stat-balance">COP $0</strong>
+                </div>
+                <div class="stat-card orange">
+                    <span>Encargos</span>
+                    <strong id="stat-orders">COP $0</strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Empresa</h2>
+                <div class="company-card" id="company-card"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Exportar resumen</h2>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <a class="button-link" href="#" id="export-csv">Descargar CSV</a>
+                    <a class="button-link" href="#" id="export-pdf">Descargar PDF</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/pages/reports.js"></script>
+</body>
+</html>

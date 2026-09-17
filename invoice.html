@@ -10,13 +10,17 @@
     <div class="app-shell">
         <main class="main-content">
             <div class="panel invoice">
-                <div class="invoice-header">
-                    <div>
-                        <p class="invoice-kicker">Comprobante</p>
+                <div class="invoice-hero">
+                    <div class="invoice-hero-copy">
+                        <p class="invoice-kicker">Comprobante de venta</p>
                         <h1>Factura</h1>
+                        <div class="invoice-meta">
+                            <span class="invoice-chip" id="invoice-date">-</span>
+                            <span class="invoice-chip">ESTAR POS</span>
+                        </div>
                     </div>
                     <div class="invoice-number-box">
-                        <span>Número</span>
+                        <span>Factura N°</span>
                         <strong id="invoice-number">#-</strong>
                     </div>
                 </div>
@@ -26,33 +30,33 @@
                     <div class="invoice-card" id="invoice-client"></div>
                 </div>
 
-                <table class="invoice-table">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr id="invoice-row"></tr>
-                    </tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-items-body">
+                            <tr><td colspan="4">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="invoice-summary">
-                    <div>
-                        <span>Fecha</span>
-                        <strong id="invoice-date">-</strong>
-                    </div>
+                    <p class="invoice-note">Gracias por tu compra.</p>
                     <div class="invoice-total">
-                        <span>Total final</span>
+                        <span>Total a pagar</span>
                         <strong id="invoice-total">-</strong>
                     </div>
                 </div>
 
                 <div class="invoice-actions">
-                    <a class="button-link" href="dashboard.html">Volver</a>
+                    <a class="button-link btn-ghost" href="sales.html">Volver</a>
+                    <button type="button" class="btn-ghost" id="print-invoice">Imprimir</button>
                     <a class="button-link" href="#" id="download-pdf">Descargar PDF</a>
                 </div>
             </div>

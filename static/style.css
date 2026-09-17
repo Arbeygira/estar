@@ -634,46 +634,98 @@ tr:nth-child(even) td {
 .flash.error { background: rgba(255, 107, 107, 0.12); color: #fecaca; border: 1px solid rgba(255, 107, 107, 0.35); }
 
 .invoice {
-    max-width: 900px;
+    max-width: 860px;
+    position: relative;
+    overflow: hidden;
 }
 
-.invoice-header {
+.invoice::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+}
+
+.invoice-hero {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 16px;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: -10px -10px 24px;
+    padding: 22px 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(60, 141, 255, 0.14) 0%, rgba(46, 197, 163, 0.1) 100%);
+    border: 1px solid var(--border);
+}
+
+body.theme-light .invoice-hero {
+    background: linear-gradient(135deg, rgba(29, 111, 229, 0.08) 0%, rgba(30, 169, 134, 0.07) 100%);
 }
 
 .invoice-kicker {
     margin: 0;
     color: var(--primary);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
     font-weight: 700;
 }
 
-.invoice-header h1 {
-    margin: 8px 0 0;
+.invoice-hero h1 {
+    margin: 6px 0 0;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+}
+
+.invoice-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.invoice-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+body.theme-light .invoice-chip {
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .invoice-number-box {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 14px 22px;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    min-width: 120px;
+    gap: 2px;
+    min-width: 140px;
     text-align: center;
+    box-shadow: 0 10px 24px rgba(31, 122, 224, 0.35);
 }
 
 .invoice-number-box span {
-    font-size: 0.75rem;
-    opacity: 0.9;
+    font-size: 0.72rem;
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.invoice-number-box strong {
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
 }
 
 .invoice-grid {
@@ -686,13 +738,29 @@ tr:nth-child(even) td {
 .invoice-card {
     background: var(--soft-panel);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 18px;
+    position: relative;
+}
+
+.invoice-card::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 0;
+    width: 3px;
+    height: 24px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
 }
 
 .invoice-card h3 {
     margin-top: 0;
     margin-bottom: 12px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
 }
 
 .invoice-card p {
@@ -703,29 +771,145 @@ tr:nth-child(even) td {
 .invoice-table {
     width: 100%;
     max-width: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.invoice-table thead th {
+    background: var(--panel-alt);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.invoice-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.invoice-table tbody tr:hover {
+    background: rgba(60, 141, 255, 0.06);
+}
+
+.invoice-table td:last-child,
+.invoice-table th:last-child {
+    text-align: right;
+    font-weight: 600;
 }
 
 .invoice-summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: var(--soft-panel);
+    border: 1px solid var(--border);
+}
+
+.invoice-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
 .invoice-total {
-    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.invoice-total span {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
 }
 
 .invoice-total strong {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
+    color: var(--accent);
+    letter-spacing: -0.01em;
 }
 
 .invoice-actions {
     display: flex;
     gap: 12px;
     margin-top: 24px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.btn-ghost,
+button.btn-ghost,
+.button-link.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    box-shadow: none;
+}
+
+.btn-ghost:hover,
+button.btn-ghost:hover,
+.button-link.btn-ghost:hover {
+    background: rgba(60, 141, 255, 0.1);
+    border-color: var(--primary);
+    filter: none;
+}
+
+@media print {
+    body {
+        background: #ffffff;
+        color: #1f2937;
+    }
+
+    .sidebar,
+    .topbar-actions,
+    .invoice-actions,
+    .messages {
+        display: none !important;
+    }
+
+    .app-shell {
+        display: block;
+        max-width: none;
+    }
+
+    .main-content {
+        padding: 0;
+    }
+
+    .panel.invoice {
+        border: none;
+        box-shadow: none;
+        background: #ffffff;
+        color: #1f2937;
+    }
+
+    .invoice-card,
+    .invoice-summary,
+    .invoice-hero {
+        background: #f6f9ff;
+        color: #1f2937;
+        border-color: #dbe6f5;
+    }
+
+    .invoice-card p,
+    .invoice-table td {
+        color: #1f2937;
+    }
+
+    .invoice-chip,
+    .invoice-card h3,
+    .invoice-total span,
+    .invoice-note,
+    .invoice-table thead th {
+        color: #5f7289;
+    }
 }
 
 .checkbox-grid {

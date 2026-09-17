@@ -7,12 +7,16 @@ initPage(null).then(async (ctx) => {
         return;
     }
 
-    const [saleRes, company] = await Promise.all([
+    const [saleRes, itemsRes, company] = await Promise.all([
         supabaseClient
             .from("sales")
             .select("*,products(name,price),clients(name,phone,email)")
             .eq("id", saleId)
             .maybeSingle(),
+        supabaseClient
+            .from("sale_items")
+            .select("quantity,unit_price,total,products(name)")
+            .eq("sale_id", saleId),
         getCompanyProfile(),
     ]);
 
@@ -26,6 +30,14 @@ initPage(null).then(async (ctx) => {
     const clientPhone = sale.clients?.phone || "Sin teléfono";
     const clientEmail = sale.clients?.email || "Sin correo";
     const productName = sale.products?.name || "-";
+    const items = (itemsRes.data || []).length
+        ? itemsRes.data.map((item) => ({
+              name: item.products?.name || "-",
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              total: item.total,
+          }))
+        : [{ name: productName, quantity: sale.quantity, unit_price: sale.unit_price, total: sale.total }];
 
     document.getElementById("invoice-number").textContent = `#${sale.id}`;
     document.getElementById("invoice-biller").innerHTML = `
@@ -41,13 +53,23 @@ initPage(null).then(async (ctx) => {
         <p><strong>${escapeHtml(clientName)}</strong></p>
         <p>${escapeHtml(clientPhone)}</p>
         <p>${escapeHtml(clientEmail)}</p>`;
-    document.getElementById("invoice-row").innerHTML = `
-        <td>${escapeHtml(productName)}</td>
-        <td>${sale.quantity}</td>
-        <td>${formatCOP(sale.unit_price)}</td>
-        <td>${formatCOP(sale.total)}</td>`;
+    document.getElementById("invoice-items-body").innerHTML = items
+        .map(
+            (item) => `
+        <tr>
+            <td>${escapeHtml(item.name)}</td>
+            <td>${item.quantity}</td>
+            <td>${formatCOP(item.unit_price)}</td>
+            <td>${formatCOP(item.total)}</td>
+        </tr>`
+        )
+        .join("");
     document.getElementById("invoice-date").textContent = formatDate(sale.created_at);
     document.getElementById("invoice-total").textContent = formatCOP(sale.total);
+
+    document.getElementById("print-invoice").addEventListener("click", () => {
+        window.print();
+    });
 
     document.getElementById("download-pdf").addEventListener("click", (event) => {
         event.preventDefault();
@@ -82,7 +104,12 @@ initPage(null).then(async (ctx) => {
         doc.autoTable({
             startY: doc.lastAutoTable.finalY + 10,
             head: [["Producto", "Cantidad", "Precio unitario", "Total"]],
-            body: [[productName, String(sale.quantity), formatCOP(sale.unit_price), formatCOP(sale.total)]],
+            body: items.map((item) => [
+                item.name,
+                String(item.quantity),
+                formatCOP(item.unit_price),
+                formatCOP(item.total),
+            ]),
         });
 
         const finalY = doc.lastAutoTable.finalY + 10;

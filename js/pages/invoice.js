@@ -28,7 +28,7 @@ initPage(null).then(async (ctx) => {
     const sale = saleRes.data;
     const clientName = sale.clients?.name || "Cliente general";
     const clientPhone = sale.clients?.phone || "Sin teléfono";
-    const clientEmail = sale.clients?.email || "Sin correo";
+    const clientEmail = sale.clients?.email || "";
     const productName = sale.products?.name || "-";
     const items = (itemsRes.data || []).length
         ? itemsRes.data.map((item) => ({
@@ -52,7 +52,7 @@ initPage(null).then(async (ctx) => {
         <h3>Cliente</h3>
         <p><strong>${escapeHtml(clientName)}</strong></p>
         <p>${escapeHtml(clientPhone)}</p>
-        <p>${escapeHtml(clientEmail)}</p>`;
+        ${clientEmail ? `<p>${escapeHtml(clientEmail)}</p>` : ""}`;
     document.getElementById("invoice-items-body").innerHTML = items
         .map(
             (item) => `
@@ -96,7 +96,7 @@ initPage(null).then(async (ctx) => {
             body: [
                 [
                     `${company.name}\n${company.document || ""}\n${company.phone || ""}\n${company.email || ""}\n${company.address || ""}`,
-                    `${clientName}\n${clientPhone}\n${clientEmail}`,
+                    `${clientName}\n${clientPhone}${clientEmail ? `\n${clientEmail}` : ""}`,
                 ],
             ],
         });

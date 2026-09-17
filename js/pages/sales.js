@@ -10,7 +10,13 @@ initPage("sales").then(async (ctx) => {
     const container = document.getElementById("sale-items-container");
     const totalDisplay = document.getElementById("sale-total-display");
     const tbody = document.getElementById("recent-sales-body");
+    const prevButton = document.getElementById("sales-prev");
+    const nextButton = document.getElementById("sales-next");
+    const pageInfo = document.getElementById("sales-page-info");
     let products = [];
+    let allSales = [];
+    let currentPage = 1;
+    const PAGE_SIZE = 10;
 
     async function loadData() {
         const [clientsRes, productsRes, salesRes] = await Promise.all([
@@ -19,8 +25,7 @@ initPage("sales").then(async (ctx) => {
             supabaseClient
                 .from("sales")
                 .select("id,quantity,total,unit_price,created_at,products(name),clients(name)")
-                .order("id", { ascending: false })
-                .limit(10),
+                .order("id", { ascending: false }),
         ]);
 
         if (clientsRes.error) showFlash(clientsRes.error.message, "error");
@@ -48,11 +53,22 @@ initPage("sales").then(async (ctx) => {
     }
 
     function renderRecent(sales) {
-        if (!sales.length) {
+        allSales = sales;
+        const totalPages = Math.max(1, Math.ceil(allSales.length / PAGE_SIZE));
+        currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+        const pageSales = allSales.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+        if (pageInfo) {
+            pageInfo.textContent = `Página ${currentPage} de ${totalPages} (${allSales.length} ventas)`;
+        }
+        if (prevButton) prevButton.disabled = currentPage <= 1;
+        if (nextButton) nextButton.disabled = currentPage >= totalPages;
+
+        if (!pageSales.length) {
             tbody.innerHTML = '<tr><td colspan="8">No hay ventas registradas.</td></tr>';
             return;
         }
-        tbody.innerHTML = sales
+        tbody.innerHTML = pageSales
             .map(
                 (sale) => `
                 <tr>
@@ -150,6 +166,19 @@ initPage("sales").then(async (ctx) => {
     });
     quantityInput.addEventListener("input", updatePreview);
     priceInput.addEventListener("input", updatePreview);
+
+    if (prevButton) {
+        prevButton.addEventListener("click", () => {
+            currentPage -= 1;
+            renderRecent(allSales);
+        });
+    }
+    if (nextButton) {
+        nextButton.addEventListener("click", () => {
+            currentPage += 1;
+            renderRecent(allSales);
+        });
+    }
 
     form.addEventListener("submit", async (event) => {
         event.preventDefault();

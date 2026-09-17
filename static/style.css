@@ -941,6 +941,43 @@ body.theme-light .order-item {
     font-size: 0.9rem;
 }
 
+.panel-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.table-search {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 14px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.pagination .small-button {
+    width: auto;
+}
+
+.pagination .small-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
 @media (max-width: 1024px) {
     .sidebar {
         width: 210px;

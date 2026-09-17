@@ -6,6 +6,7 @@ initPage("clients").then(async (ctx) => {
     const submitButton = document.getElementById("submit-button");
     const cancelLink = document.getElementById("cancel-edit");
     const tbody = document.getElementById("clients-body");
+    const searchInput = document.getElementById("client-search");
     let clients = [];
 
     async function loadClients() {
@@ -22,8 +23,16 @@ initPage("clients").then(async (ctx) => {
     }
 
     function renderTable() {
-        tbody.innerHTML = clients.length
-            ? clients
+        const term = (searchInput.value || "").trim().toLowerCase();
+        const filtered = term
+            ? clients.filter((client) =>
+                  [client.name, client.phone, client.email]
+                      .filter(Boolean)
+                      .some((field) => field.toLowerCase().includes(term))
+              )
+            : clients;
+        tbody.innerHTML = filtered.length
+            ? filtered
                   .map(
                       (client) => `
                 <tr>
@@ -39,7 +48,7 @@ initPage("clients").then(async (ctx) => {
                 </tr>`
                   )
                   .join("")
-            : '<tr><td colspan="4">No hay clientes registrados.</td></tr>';
+            : `<tr><td colspan="4">${term ? "Sin resultados para la búsqueda." : "No hay clientes registrados."}</td></tr>`;
 
         tbody.querySelectorAll("[data-delete]").forEach((button) => {
             button.addEventListener("click", async () => {
@@ -114,4 +123,6 @@ initPage("clients").then(async (ctx) => {
         const client = clients.find((c) => c.id === editId);
         if (client) enterEditMode(client);
     }
+
+    searchInput.addEventListener("input", renderTable);
 });

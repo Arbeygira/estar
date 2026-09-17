@@ -9,6 +9,11 @@ initPage("orders").then(async (ctx) => {
     const clientInput = document.querySelector(".client-search-input");
     const optionsList = document.querySelector(".client-search-options");
     const tbody = document.getElementById("orders-body");
+    const addItemButton = document.getElementById("add-order-item");
+    const itemsList = document.getElementById("order-items-list");
+
+    let products = [];
+    const items = [];
 
     const STATUS_LABELS = {
         pendiente: "Pendiente",
@@ -40,9 +45,10 @@ initPage("orders").then(async (ctx) => {
             .join("");
         bindClientSearch();
 
+        products = productsRes.data || [];
         productSelect.innerHTML =
             '<option value="">Selecciona un producto</option>' +
-            (productsRes.data || [])
+            products
                 .map(
                     (p) =>
                         `<option value="${p.id}" data-price="${p.price}">${escapeHtml(p.name)} - ${formatCOP(p.price)}</option>`
@@ -168,25 +174,67 @@ initPage("orders").then(async (ctx) => {
     }
 
     function updateTotal() {
-        const selected = productSelect.options[productSelect.selectedIndex];
-        const basePrice = selected ? parseFloat(selected.dataset.price || 0) : 0;
-        const quantity = parseFloat(quantityInput.value || 1);
-        const unitPrice = parseFloat(unitPriceInput.value || basePrice || 0);
-        const total = quantity * unitPrice;
-        totalInput.value = isNaN(total) ? "0" : total.toFixed(2);
-        if (unitPriceInput.value === "" || Number(unitPriceInput.value) === 0) {
-            unitPriceInput.value = basePrice.toFixed(2);
-        }
+        const total = items.reduce((acc, item) => acc + item.quantity * item.unit_price, 0);
+        totalInput.value = total.toFixed(2);
     }
+
+    function renderItems() {
+        itemsList.innerHTML = items.length
+            ? items
+                  .map(
+                      (item, index) => `
+                <li class="order-item">
+                    <span>${item.quantity}× ${escapeHtml(item.name)} — ${formatCOP(item.quantity * item.unit_price)}</span>
+                    <button type="button" class="small-button danger" data-remove="${index}">Quitar</button>
+                </li>`
+                  )
+                  .join("")
+            : '<li class="order-items-empty">No hay productos agregados.</li>';
+        itemsList.querySelectorAll("[data-remove]").forEach((button) => {
+            button.addEventListener("click", () => {
+                items.splice(Number(button.dataset.remove), 1);
+                renderItems();
+                updateTotal();
+            });
+        });
+    }
+
+    addItemButton.addEventListener("click", () => {
+        const productId = Number(productSelect.value || 0);
+        const product = products.find((p) => p.id === productId);
+        const quantity = parseInt(quantityInput.value || "1", 10);
+        let unitPrice = parseFloat(unitPriceInput.value || "0");
+        if (!product) {
+            showFlash("Selecciona un producto para agregar.", "error");
+            return;
+        }
+        if (quantity <= 0) {
+            showFlash("La cantidad debe ser mayor a cero.", "error");
+            return;
+        }
+        if (unitPrice <= 0) unitPrice = Number(product.price || 0);
+
+        const existing = items.find(
+            (item) => item.product_id === productId && item.unit_price === unitPrice
+        );
+        if (existing) {
+            existing.quantity += quantity;
+        } else {
+            items.push({ product_id: productId, name: product.name, quantity, unit_price: unitPrice });
+        }
+
+        productSelect.value = "";
+        quantityInput.value = 1;
+        unitPriceInput.value = "0";
+        renderItems();
+        updateTotal();
+    });
 
     productSelect.addEventListener("change", () => {
         const selected = productSelect.options[productSelect.selectedIndex];
         const price = selected && selected.dataset.price ? parseFloat(selected.dataset.price) : 0;
         unitPriceInput.value = price > 0 ? price.toFixed(2) : "0.00";
-        updateTotal();
     });
-    quantityInput.addEventListener("input", updateTotal);
-    unitPriceInput.addEventListener("input", updateTotal);
 
     function bindClientSearch() {
         const options = [...optionsList.querySelectorAll(".client-search-option")];
@@ -222,43 +270,29 @@ initPage("orders").then(async (ctx) => {
         event.preventDefault();
         const clientName = clientInput.value.trim();
         const description = form.description.value.trim();
-        const productId = Number(productSelect.value || 0);
-        const quantity = parseInt(quantityInput.value || "1", 10);
-        let unitPrice = parseFloat(unitPriceInput.value || "0");
         const deposit = parseFloat(form.deposit.value || "0");
         const paidAmount = parseFloat(form.paid_amount.value || "0");
         const status = form.status.value;
 
-        let finalDescription = description;
-        if (productId) {
-            const { data: product } = await supabaseClient
-                .from("products")
-                .select("*")
-                .eq("id", productId)
-                .maybeSingle();
-            if (product) {
-                if (unitPrice <= 0) unitPrice = Number(product.price);
-                finalDescription = finalDescription || product.name;
-            }
-        }
-
-        const total = quantity * unitPrice;
-        if (!clientName || !productId || quantity <= 0 || total <= 0) {
-            showFlash("Selecciona cliente, producto, cantidad y precio válidos.", "error");
+        if (!clientName || !items.length) {
+            showFlash("Selecciona un cliente y agrega al menos un producto.", "error");
             return;
         }
 
-        const { error } = await supabaseClient.from("orders").insert({
+        const summary = items.map((item) => `${item.quantity}× ${item.name}`).join(", ");
+        const rows = items.map((item, index) => ({
             client_name: clientName,
-            description: finalDescription,
-            product_id: productId,
-            quantity,
-            unit_price: unitPrice,
-            total,
-            deposit,
-            paid_amount: paidAmount,
+            description: description ? `${description} (${summary})` : summary,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total: item.quantity * item.unit_price,
+            deposit: index === 0 ? deposit : 0,
+            paid_amount: index === 0 ? paidAmount : 0,
             status,
-        });
+        }));
+
+        const { error } = await supabaseClient.from("orders").insert(rows);
         if (error) {
             showFlash(error.message, "error");
         } else {
@@ -266,5 +300,6 @@ initPage("orders").then(async (ctx) => {
         }
     });
 
+    renderItems();
     await loadData();
 });

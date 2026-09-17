@@ -223,9 +223,21 @@ function renderShell(session, permissions, activePage) {
     const toggle = aside.querySelector(".mobile-menu-toggle");
     const nav = aside.querySelector("#sidebarNav");
     if (toggle && nav) {
+        const closeMenu = () => {
+            nav.classList.remove("open");
+            toggle.classList.remove("active");
+        };
         toggle.addEventListener("click", () => {
             nav.classList.toggle("open");
             toggle.classList.toggle("active");
+        });
+        nav.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", closeMenu);
+        });
+        document.addEventListener("click", (event) => {
+            if (nav.classList.contains("open") && !aside.contains(event.target)) {
+                closeMenu();
+            }
         });
     }
 }

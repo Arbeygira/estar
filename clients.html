@@ -14,8 +14,9 @@
             </div>
 
             <div class="panel">
-                <h2>Registrar cliente</h2>
+                <h2 id="form-title">Registrar cliente</h2>
                 <form id="client-form" class="grid-form">
+                    <input type="hidden" name="client_id" value="">
                     <div>
                         <label>Nombre</label>
                         <input type="text" name="name" required>
@@ -29,7 +30,8 @@
                         <input type="text" name="contact" placeholder="Ej. 3001234567">
                     </div>
                     <div class="full-span">
-                        <button type="submit">Guardar cliente</button>
+                        <button type="submit" id="submit-button">Guardar cliente</button>
+                        <a class="button-link small-button" href="clients.html" id="cancel-edit" style="display:none;">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -42,10 +44,11 @@
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Contacto</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="clients-body">
-                        <tr><td colspan="3">Cargando...</td></tr>
+                        <tr><td colspan="4">Cargando...</td></tr>
                     </tbody>
                 </table>
             </div>

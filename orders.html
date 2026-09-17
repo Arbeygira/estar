@@ -23,17 +23,23 @@
                     </div>
                     <div>
                         <label>Producto</label>
-                        <select name="product_id" id="order-product-select" required>
+                        <select name="product_id" id="order-product-select">
                             <option value="">Selecciona un producto</option>
                         </select>
                     </div>
                     <div>
                         <label>Cantidad</label>
-                        <input type="number" min="1" name="quantity" id="order-quantity" value="1" required>
+                        <input type="number" min="1" name="quantity" id="order-quantity" value="1">
                     </div>
                     <div>
                         <label>Precio unitario</label>
-                        <input type="number" step="0.01" min="0" name="unit_price" id="order-unit-price" value="0" required>
+                        <input type="number" step="0.01" min="0" name="unit_price" id="order-unit-price" value="0">
+                    </div>
+                    <div class="full-span">
+                        <button type="button" id="add-order-item" class="small-button">+ Agregar producto</button>
+                    </div>
+                    <div class="full-span">
+                        <ul id="order-items-list" class="order-items-list"></ul>
                     </div>
                     <div>
                         <label>Total</label>

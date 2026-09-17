@@ -842,6 +842,17 @@ body.theme-light .invoice-chip {
     margin-top: 24px;
     justify-content: flex-end;
     flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.invoice-actions .button-link,
+.invoice-actions button {
+    min-height: 42px;
+}
+
+.btn-icon {
+    font-size: 1.15rem;
+    padding: 10px 16px;
 }
 
 .btn-ghost,

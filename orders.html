@@ -74,8 +74,27 @@
             </div>
 
             <div class="panel">
-                <h2>Listado de encargos</h2>
-                <input type="search" id="order-search" class="table-search" placeholder="Buscar encargo por cliente o producto..." autocomplete="off">
+                <div class="panel-header-row">
+                    <h2>Listado de encargos</h2>
+                    <button type="button" id="orders-pdf" class="small-button btn-icon" title="Descargar PDF">📄 PDF</button>
+                </div>
+                <div class="filter-row">
+                    <input type="search" id="order-search" class="table-search" placeholder="Buscar encargo por cliente o producto..." autocomplete="off">
+                    <select id="order-status-filter" class="status-filter" aria-label="Filtrar por estado">
+                        <option value="activos">Activos</option>
+                        <option value="todos">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_proceso">En proceso</option>
+                        <option value="terminado">Terminado</option>
+                        <option value="entregado">Entregado</option>
+                        <option value="pagado">Pagado</option>
+                    </select>
+                </div>
+                <p class="orders-legend">
+                    <span><span class="money-badge badge-valor">V</span>Valor</span>
+                    <span><span class="money-badge badge-abono">A</span>Abono</span>
+                    <span><span class="money-badge badge-pago">P</span>Pago</span>
+                </p>
                 <table>
                     <thead>
                         <tr>
@@ -83,9 +102,9 @@
                             <th>Cliente</th>
                             <th>Producto</th>
                             <th>Cantidad</th>
-                            <th>Total</th>
-                            <th>Anticipo</th>
-                            <th>Pagado</th>
+                            <th>Valor</th>
+                            <th>Abono</th>
+                            <th>Pago</th>
                             <th>Estado</th>
                             <th>Fecha</th>
                             <th>Acción</th>
@@ -99,6 +118,8 @@
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
     <script src="js/pages/orders.js"></script>

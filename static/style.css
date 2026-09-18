@@ -1431,3 +1431,78 @@ body.theme-light .order-item {
         transform: translateY(0);
     }
 }
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.filter-row .table-search {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 220px;
+}
+
+.status-filter {
+    width: auto;
+    min-width: 160px;
+    flex-shrink: 0;
+}
+
+.orders-legend {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.orders-legend > span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.money-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fff;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.money-badge.badge-valor { background: var(--primary); }
+.money-badge.badge-abono { background: var(--warning); }
+.money-badge.badge-pago { background: var(--success); }
+
+.money-cell {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.money-cell .money-badge {
+    margin-right: 6px;
+}
+
+.btn-icon {
+    width: auto;
+    min-width: 40px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}

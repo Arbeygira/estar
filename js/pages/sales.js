@@ -81,7 +81,7 @@ initPage("sales").then(async (ctx) => {
                     <td>${formatDate(sale.created_at)}</td>
                     <td>
                         <div class="inline-actions">
-                            <a class="small-button" href="invoice.html?id=${sale.id}">Factura</a>
+                            <a class="small-button btn-icon" href="invoice.html?id=${sale.id}" title="Ver factura" aria-label="Ver factura">🧾</a>
                             <button type="button" class="small-button danger" data-delete="${sale.id}">Eliminar</button>
                         </div>
                     </td>

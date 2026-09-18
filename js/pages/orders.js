@@ -12,9 +12,12 @@ initPage("orders").then(async (ctx) => {
     const addItemButton = document.getElementById("add-order-item");
     const itemsList = document.getElementById("order-items-list");
     const searchInput = document.getElementById("order-search");
+    const statusFilter = document.getElementById("order-status-filter");
+    const pdfButton = document.getElementById("orders-pdf");
 
     let products = [];
     let allOrders = [];
+    let salesOrderIds = new Set();
     const items = [];
 
     const STATUS_LABELS = {
@@ -26,18 +29,20 @@ initPage("orders").then(async (ctx) => {
     };
 
     async function loadData() {
-        const [clientsRes, productsRes, ordersRes] = await Promise.all([
+        const [clientsRes, productsRes, ordersRes, salesRes] = await Promise.all([
             supabaseClient.from("clients").select("id,name").order("name", { ascending: true }),
             supabaseClient.from("products").select("id,name,price").order("name", { ascending: true }),
             supabaseClient
                 .from("orders")
                 .select("*,products(name)")
                 .order("id", { ascending: false }),
+            supabaseClient.from("sales").select("order_id"),
         ]);
 
         if (clientsRes.error) showFlash(clientsRes.error.message, "error");
         if (productsRes.error) showFlash(productsRes.error.message, "error");
         if (ordersRes.error) showFlash(ordersRes.error.message, "error");
+        if (salesRes.error) showFlash(salesRes.error.message, "error");
 
         optionsList.innerHTML = (clientsRes.data || [])
             .map(
@@ -58,6 +63,9 @@ initPage("orders").then(async (ctx) => {
                 .join("");
 
         allOrders = ordersRes.data || [];
+        salesOrderIds = new Set(
+            (salesRes.data || []).map((sale) => sale.order_id).filter(Boolean)
+        );
         renderOrders();
     }
 
@@ -70,17 +78,32 @@ initPage("orders").then(async (ctx) => {
             .join("");
     }
 
-    function renderOrders() {
+    function getFilteredOrders() {
         const term = (searchInput.value || "").trim().toLowerCase();
-        const orders = term
-            ? allOrders.filter((order) =>
-                  [order.client_name, order.products?.name, order.description]
-                      .filter(Boolean)
-                      .some((field) => String(field).toLowerCase().includes(term))
-              )
-            : allOrders;
+        const statusValue = statusFilter ? statusFilter.value : "activos";
+        let orders = allOrders;
+        if (statusValue === "activos") {
+            // Los encargos pagados que ya pasaron a ventas se retiran de este apartado
+            orders = orders.filter(
+                (order) => !(order.status === "pagado" && salesOrderIds.has(order.id))
+            );
+        } else if (statusValue !== "todos") {
+            orders = orders.filter((order) => order.status === statusValue);
+        }
+        if (term) {
+            orders = orders.filter((order) =>
+                [order.client_name, order.products?.name, order.description]
+                    .filter(Boolean)
+                    .some((field) => String(field).toLowerCase().includes(term))
+            );
+        }
+        return orders;
+    }
+
+    function renderOrders() {
+        const orders = getFilteredOrders();
         if (!orders.length) {
-            tbody.innerHTML = `<tr><td colspan="10">${term ? "Sin resultados para la búsqueda." : "No hay encargos registrados."}</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="10">No hay encargos para los filtros seleccionados.</td></tr>';
             return;
         }
         tbody.innerHTML = orders
@@ -92,9 +115,9 @@ initPage("orders").then(async (ctx) => {
                     <td>${escapeHtml(order.client_name)}</td>
                     <td>${escapeHtml(order.products?.name || order.description || "Sin producto")}</td>
                     <td>${order.quantity || 1}</td>
-                    <td>${formatCOP(order.total)}</td>
-                    <td>${formatCOP(order.deposit)}</td>
-                    <td>${formatCOP(order.paid_amount || 0)}</td>
+                    <td><span class="money-cell"><span class="money-badge badge-valor" title="Valor">V</span>${formatCOP(order.total)}</span></td>
+                    <td><span class="money-cell"><span class="money-badge badge-abono" title="Abono">A</span>${formatCOP(order.deposit)}</span></td>
+                    <td><span class="money-cell"><span class="money-badge badge-pago" title="Pago">P</span>${formatCOP(order.paid_amount || 0)}</span></td>
                     <td>
                         <form class="order-status-form" data-order="${order.id}">
                             <select name="status">${statusOptions(order.status)}</select>
@@ -155,7 +178,7 @@ initPage("orders").then(async (ctx) => {
                         .limit(1)
                         .maybeSingle();
                     if (!existingSale && order.product_id) {
-                        await supabaseClient.from("sales").insert({
+                        const { error: saleError } = await supabaseClient.from("sales").insert({
                             product_id: order.product_id,
                             client_id: client ? client.id : null,
                             order_id: orderId,
@@ -163,7 +186,23 @@ initPage("orders").then(async (ctx) => {
                             unit_price: order.unit_price,
                             total: order.total,
                         });
+                        if (saleError) {
+                            showFlash(saleError.message, "error");
+                            return;
+                        }
                     }
+                    // Liberar la referencia de la venta y retirar el encargo de este apartado
+                    await supabaseClient.from("sales").update({ order_id: null }).eq("order_id", orderId);
+                    const { error: deleteError } = await supabaseClient
+                        .from("orders")
+                        .delete()
+                        .eq("id", orderId);
+                    if (deleteError) {
+                        showFlash(deleteError.message, "error");
+                        return;
+                    }
+                    flashAndGo("Encargo pagado y movido a ventas.", "success", "orders.html");
+                    return;
                 }
 
                 flashAndGo("Estado del encargo actualizado.", "success", "orders.html");
@@ -312,6 +351,51 @@ initPage("orders").then(async (ctx) => {
     });
 
     searchInput.addEventListener("input", renderOrders);
+    statusFilter.addEventListener("change", renderOrders);
+
+    pdfButton.addEventListener("click", async () => {
+        const orders = getFilteredOrders();
+        if (!orders.length) {
+            showFlash("No hay encargos para exportar.", "error");
+            return;
+        }
+        const company = await getCompanyProfile();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let y = 20;
+
+        if (company.logo_url && company.logo_url.startsWith("data:image")) {
+            try {
+                doc.addImage(company.logo_url, "PNG", 14, y, 20, 20);
+            } catch {
+                /* logo omitido */
+            }
+        }
+        doc.setFontSize(18);
+        doc.text(`${company.name} - Listado de encargos`, 40, y + 10);
+        y += 30;
+        doc.setFontSize(10);
+        doc.text(`Generado: ${new Date().toLocaleString("es-CO")}`, 14, y);
+
+        doc.autoTable({
+            startY: y + 6,
+            head: [["ID", "Cliente", "Producto", "Cant.", "Valor", "Abono", "Pago", "Estado", "Fecha"]],
+            body: orders.map((order) => [
+                order.id,
+                order.client_name,
+                order.products?.name || order.description || "Sin producto",
+                order.quantity || 1,
+                formatCOP(order.total),
+                formatCOP(order.deposit),
+                formatCOP(order.paid_amount || 0),
+                STATUS_LABELS[order.status] || order.status,
+                formatDate(order.created_at),
+            ]),
+            styles: { fontSize: 8 },
+        });
+
+        doc.save("encargos_estar.pdf");
+    });
 
     renderItems();
     await loadData();

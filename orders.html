@@ -117,6 +117,22 @@
             </div>
         </main>
     </div>
+
+    <div class="modal-overlay" id="payment-modal" hidden>
+        <div class="modal-card">
+            <div class="panel-header-row">
+                <h2>Imagen de pago</h2>
+                <button type="button" id="payment-close" class="small-button danger btn-icon" title="Cerrar">✖</button>
+            </div>
+            <canvas id="payment-canvas"></canvas>
+            <div class="modal-actions">
+                <button type="button" id="payment-download" class="small-button">⬇ Descargar</button>
+                <a id="payment-whatsapp" class="button-link small-button" target="_blank" rel="noopener">📲 Enviar por WhatsApp</a>
+            </div>
+            <p class="modal-hint">Descarga la imagen y adjúntala en el chat de WhatsApp.</p>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>

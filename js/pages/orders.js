@@ -14,6 +14,14 @@ initPage("orders").then(async (ctx) => {
     const searchInput = document.getElementById("order-search");
     const statusFilter = document.getElementById("order-status-filter");
     const pdfButton = document.getElementById("orders-pdf");
+    const paymentModal = document.getElementById("payment-modal");
+    const paymentCanvas = document.getElementById("payment-canvas");
+    const paymentClose = document.getElementById("payment-close");
+    const paymentDownload = document.getElementById("payment-download");
+    const paymentWhatsapp = document.getElementById("payment-whatsapp");
+
+    const PAYMENT_TEMPLATE = "static/uploads/pago-qr.png";
+    let paymentTemplate = null;
 
     let products = [];
     let allOrders = [];
@@ -130,6 +138,7 @@ initPage("orders").then(async (ctx) => {
                     <td>
                         <div class="inline-actions">
                             <span>${pending ? "Debe" : "Pagado"}</span>
+                            ${order.status === "entregado" ? `<button type="button" class="small-button btn-icon" data-payment="${order.id}" title="Generar imagen de pago">💳</button>` : ""}
                             <button type="button" class="small-button danger" data-delete="${order.id}">Eliminar</button>
                         </div>
                     </td>
@@ -219,6 +228,12 @@ initPage("orders").then(async (ctx) => {
                 } else {
                     flashAndGo("Encargo eliminado correctamente.", "success", "orders.html");
                 }
+            });
+        });
+        tbody.querySelectorAll("[data-payment]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const order = allOrders.find((o) => o.id === Number(button.dataset.payment));
+                if (order) openPaymentModal(order);
             });
         });
     }
@@ -350,6 +365,63 @@ initPage("orders").then(async (ctx) => {
         }
     });
 
+    function loadPaymentTemplate() {
+        if (paymentTemplate) return Promise.resolve(paymentTemplate);
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                paymentTemplate = img;
+                resolve(img);
+            };
+            img.onerror = () => reject(new Error("No se encontró la plantilla " + PAYMENT_TEMPLATE));
+            img.src = PAYMENT_TEMPLATE;
+        });
+    }
+
+    async function openPaymentModal(order) {
+        try {
+            const img = await loadPaymentTemplate();
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            paymentCanvas.width = w;
+            paymentCanvas.height = h;
+            const ctx2d = paymentCanvas.getContext("2d");
+            ctx2d.drawImage(img, 0, 0, w, h);
+
+            // Escribir el valor a pagar dentro del recuadro punteado (la plantilla ya tiene el $)
+            const value = new Intl.NumberFormat("es-CO").format(Number(order.total || 0));
+            ctx2d.fillStyle = "#1b5e20";
+            ctx2d.font = `bold ${Math.round(h * 0.052)}px Arial`;
+            ctx2d.textBaseline = "middle";
+            ctx2d.fillText(value, w * 0.555, h * 0.838);
+
+            const { data: client } = await supabaseClient
+                .from("clients")
+                .select("phone")
+                .eq("name", order.client_name)
+                .limit(1)
+                .maybeSingle();
+            const productName = order.products?.name || order.description || "tu pedido";
+            const message = `Hola ${order.client_name}, ${productName} ya fue entregado. Valor a pagar: ${formatCOP(order.total)}. Te compartimos la imagen con el código QR para el pago.`;
+            const phone = (client?.phone || "").replace(/\D/g, "");
+            const phoneWithCode = phone ? (phone.startsWith("57") ? phone : `57${phone}`) : "";
+            paymentWhatsapp.href = phoneWithCode
+                ? `https://wa.me/${phoneWithCode}?text=${encodeURIComponent(message)}`
+                : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+            paymentDownload.onclick = () => {
+                const link = document.createElement("a");
+                link.href = paymentCanvas.toDataURL("image/png");
+                link.download = `pago_encargo_${order.id}.png`;
+                link.click();
+            };
+
+            paymentModal.hidden = false;
+        } catch (error) {
+            showFlash(error.message, "error");
+        }
+    }
+
     searchInput.addEventListener("input", renderOrders);
     statusFilter.addEventListener("change", renderOrders);
 
@@ -395,6 +467,13 @@ initPage("orders").then(async (ctx) => {
         });
 
         doc.save("encargos_estar.pdf");
+    });
+
+    paymentClose.addEventListener("click", () => {
+        paymentModal.hidden = true;
+    });
+    paymentModal.addEventListener("click", (event) => {
+        if (event.target === paymentModal) paymentModal.hidden = true;
     });
 
     renderItems();

@@ -11,8 +11,10 @@ initPage("orders").then(async (ctx) => {
     const tbody = document.getElementById("orders-body");
     const addItemButton = document.getElementById("add-order-item");
     const itemsList = document.getElementById("order-items-list");
+    const searchInput = document.getElementById("order-search");
 
     let products = [];
+    let allOrders = [];
     const items = [];
 
     const STATUS_LABELS = {
@@ -55,7 +57,8 @@ initPage("orders").then(async (ctx) => {
                 )
                 .join("");
 
-        renderOrders(ordersRes.data || []);
+        allOrders = ordersRes.data || [];
+        renderOrders();
     }
 
     function statusOptions(current) {
@@ -67,9 +70,17 @@ initPage("orders").then(async (ctx) => {
             .join("");
     }
 
-    function renderOrders(orders) {
+    function renderOrders() {
+        const term = (searchInput.value || "").trim().toLowerCase();
+        const orders = term
+            ? allOrders.filter((order) =>
+                  [order.client_name, order.products?.name, order.description]
+                      .filter(Boolean)
+                      .some((field) => String(field).toLowerCase().includes(term))
+              )
+            : allOrders;
         if (!orders.length) {
-            tbody.innerHTML = '<tr><td colspan="10">No hay encargos registrados.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="10">${term ? "Sin resultados para la búsqueda." : "No hay encargos registrados."}</td></tr>`;
             return;
         }
         tbody.innerHTML = orders
@@ -299,6 +310,8 @@ initPage("orders").then(async (ctx) => {
             flashAndGo("Encargo guardado correctamente.", "success", "orders.html");
         }
     });
+
+    searchInput.addEventListener("input", renderOrders);
 
     renderItems();
     await loadData();
